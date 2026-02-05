@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <title>Պարաբոլա - Անվերջ Գրաֆիկ</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            color: #ccc;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        input {
+            padding: 10px;
+            background: #3d3d3d;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+            width: 100px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        #graph {
+            height: 600px;
+            background: #252525;
+            border-radius: 10px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+        
+        .info {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 10px;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .info strong {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+<h1>Փոփոխված Պարաբոլա</h1>
+
+    <div class="container">
+        <h1>Պարաբոլայի Անվերջ Գրաֆիկ</h1>
+        
+        <div class="panel">
+            <div class="controls">
+                <div class="input-group">
+                    <label>a (x² գործակից)</label>
+                    <input id="a" value="1" step="0.1" type="number">
+                </div>
+                
+                <div class="input-group">
+                    <label>b (x գործակից)</label>
+                    <input id="b" value="0" step="0.1" type="number">
+                </div>
+                
+                <div class="input-group">
+                    <label>c (հաստատուն)</label>
+                    <input id="c" value="0" step="0.1" type="number">
+                </div>
+                
+                <button onclick="draw()">Գծել Պարաբոլան</button>
+            </div>
+        </div>
+        
+        <div id="graph"></div>
+        
+        <div class="info">
+            <strong>Օգտագործման հրահանգներ:</strong>
+            <p>• Փոխիր a, b, c արժեքները և սեղմիր "Գծել Պարաբոլան"</p>
+            <p>• Մկնիկի սքրոլով՝ մեծացնել/փոքրացնել գրաֆիկը</p>
+            <p>• Քաշիր գրաֆիկը՝ շարժելու համար</p>
+            <p>• a-ն որոշում է պարաբոլայի լայնությունը</p>
+            <p id="status">Պատրաստ է աշխատելու...</p>
+        </div>
+    </div>
+    
+    <script>
+        const graphDiv = document.getElementById("graph");
+        const statusEl = document.getElementById("status");
+        
+        // Գրաֆիկի կարգավորումներ
+        const layout = {
+            dragmode: "pan",
+            xaxis: {
+                title: "X առանցք",
+                range: [-20, 20],
+                zeroline: true,
+                zerolinecolor: '#666',
+                gridcolor: '#444',
+                showgrid: true,
+                color: '#ccc'
+            },
+            yaxis: {
+                title: "Y առանցք",
+                range: [-20, 20],
+                zeroline: true,
+                zerolinecolor: '#666',
+                gridcolor: '#444',
+                showgrid: true,
+                color: '#ccc'
+            },
+            plot_bgcolor: '#252525',
+            paper_bgcolor: '#1a1a1a',
+            font: {color: '#ccc'},
+            margin: {l: 60, r: 40, t: 40, b: 60},
+            showlegend: true,
+            legend: {x: 0.02, y: 0.98}
+        };
+        
+        const config = {
+            scrollZoom: true,
+            displaylogo: false,
+            displayModeBar: true,
+            responsive: true
+        };
+        
+        // Սկզբնական գրաֆիկ
+        Plotly.newPlot(graphDiv, [], layout, config);
+        
+        // Գրաֆիկ նկարելու ֆունկցիա
+        function draw(xmin = -50, xmax = 50) {
+            const a = parseFloat(document.getElementById("a").value) || 0;
+            const b = parseFloat(document.getElementById("b").value) || 0;
+            const c = parseFloat(document.getElementById("c").value) || 0;
+            
+            statusEl.textContent = "Գծում եմ պարաբոլան...";
+            
+            fetch("/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    a: a,
+                    b: b,
+                    c: c,
+                    xmin: xmin,
+                    xmax: xmax
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    statusEl.textContent = "Սխալ: " + data.error;
+                    return;
+                }
+                
+                // Պարաբոլայի գիծ
+                const trace = {
+                    x: data.x,
+                    y: data.y,
+                    mode: "lines",
+                    line: {width: 3, color: '#4CAF50'},
+                    name: `y = ${a}x² ${b >= 0 ? '+' : ''}${b}x ${c >= 0 ? '+' : ''}${c}`
+                };
+                
+                Plotly.react(graphDiv, [trace], layout, config);
+                
+                statusEl.innerHTML = `
+                    Պարաբոլան գծված է | 
+                    <strong>Կետեր:</strong> ${data.num_points} | 
+                    <strong>Գագաթ:</strong> (${data.vertex[0].toFixed(2)}, ${data.vertex[1].toFixed(2)})
+                `;
+            })
+            .catch(error => {
+                statusEl.textContent = "Սխալ սերվերի հետ կապվելիս: " + error.message;
+                console.error('Սխալ:', error);
+            });
+        }
+        
+        // Zoom event → անվերջ վերագծում
+        graphDiv.on('plotly_relayout', e => {
+            if (e["xaxis.range[0]"] && e["xaxis.range[1]"]) {
+                const xmin = e["xaxis.range[0]"];
+                const xmax = e["xaxis.range[1]"];
+                draw(xmin, xmax);
+            }
+        });
+        
+        // Սկզբնական գրաֆիկ
+        draw();
+    </script>
+</body>
+</html>
