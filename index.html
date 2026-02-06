@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8">
+<title>✨ Պարաբոլայի Հրաշք</title>
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<style>
+/* 🌌 Հիմնական ոճեր */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #fff;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* 🎇 Գլխավոր կոնտեյներ */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+    position: relative;
+}
+
+/* ✨ Վերնագիր */
+.main-title {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.main-title h1 {
+    font-size: 3.5rem;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+    animation: titleGlow 3s infinite alternate;
+}
+
+@keyframes titleGlow {
+    0% { text-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
+    100% { text-shadow: 0 0 40px rgba(78, 205, 196, 0.5); }
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #a5b4fc;
+    margin-top: 10px;
+    opacity: 0.8;
+}
+
+/* 🎮 Կառավարման վահանակ */
+.control-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.control-panel::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shine 3s infinite linear;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 🎯 Մուտքագրման դաշտեր */
+.input-group {
+    position: relative;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #c3cfe2;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* 🔘 Կոճակներ */
+.buttons {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.glow-button {
+    flex: 1;
+    padding: 18px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.glow-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.glow-button:hover::before {
+    left: 100%;
+}
+
+#updateBtn {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+    box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+}
+
+#updateBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(78, 205, 196, 0.6);
+}
+
+#resetBtn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+}
+
+#resetBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.6);
+}
+
+/* 📊 Գրաֆիկի տարածք */
+.graph-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    height: 700px;
+    position: relative;
+}
+
+#graph {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* 💫 Տեղեկատվության վահանակ */
+.info-panel {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    padding: 25px;
+    border-left: 5px solid;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card:nth-child(1) { border-left-color: #4ecdc4; }
+.stat-card:nth-child(2) { border-left-color: #ff6b6b; }
+.stat-card:nth-child(3) { border-left-color: #45b7d1; }
+
+.stat-card h3 {
+    color: #c3cfe2;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-card h3::before {
+    content: '✨';
+    font-size: 1.2rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-label {
+    color: #a5b4fc;
+}
+
+.stat-value {
+    color: white;
+    font-weight: 600;
+}
+
+/* 🌟 Անվերջության էֆեկտ */
+.infinity-effect {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(45deg, rgba(78, 205, 196, 0.1), rgba(255, 107, 107, 0.1));
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.infinity-text {
+    font-size: 2rem;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: colorShift 3s infinite alternate;
+}
+
+@keyframes colorShift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+/* 📱 Հարմարեցում մոբայլի համար */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .main-title h1 {
+        font-size: 2.5rem;
+    }
+    
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .graph-container {
+        height: 500px;
+        padding: 15px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+}
+
+/* 🎆 Լրացուցիչ էֆեկտներ */
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* 📱 Մոբայլի համար */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .main-title h1 {
+        font-size: 2.5rem;
+    }
+    
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .graph-container {
+        height: 500px;
+        padding: 15px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+}
+
+/* ⬆️ ՀԻՄԱ ԴՈՒՐՍ ՉԿԱ ՆԵՂ-ԼԱՅՆ ՍԿԱԼԱ - ՀԱՆՎԱԾ Է ⬆️ */
+</style>
+</head>
+<body>
+    <div class="container">
+        <!-- 🌟 Վերնագիր -->
+        <div class="main-title floating">
+            <h1>✨ Պարաբոլայի Գրաֆիկ ✨</h1>
+        </div>
+        
+        <!-- 🎮 Կառավարման վահանակ -->
+        <div class="control-panel">
+            <div class="controls-grid">
+                <div class="input-group">
+                    <label>🎯 a (x² գործակից)</label>
+                    <input type="number" id="a" value="1" step="1" min="-1000" max="1000">
+                </div>
+                
+                <div class="input-group">
+                    <label>📐 b (x գործակից)</label>
+                    <input type="number" id="b" value="0" step="1" min="-10000" max="10000">
+                </div>
+                
+                <div class="input-group">
+                    <label>📍 c (ազատ անդամ)</label>
+                    <input type="number" id="c" value="0" step="1" min="-10000" max="10000">
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button class="glow-button" id="updateBtn">✨ ԹԱՐՄԱՑՆԵԼ</button>
+                <button class="glow-button" id="resetBtn">🔄 ՎԵՐԱԿԱՆԳՆԵԼ</button>
+            </div>
+            
+            <!-- ⚠️ ԱՅՍՏԵՂ ՆԵՂ-ԼԱՅՆ ՍԿԱԼԱՆ ՀԱՆՎԱԾ Է -->
+        </div>
+        
+        <!-- 📊 Գրաֆիկի տարածք -->
+        <div class="graph-container">
+            <div id="graph"></div>
+        </div>
+        
+        <!-- 💫 Տեղեկատվության վահանակ -->
+        <div class="info-panel">
+            <div class="stats-grid" id="parabolaInfo">
+                <!-- Այստեղ կլրացվեն տվյալները -->
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        // 🎯 DOM տարրեր
+        const graphDiv = document.getElementById('graph');
+        const aInput = document.getElementById('a');
+        const bInput = document.getElementById('b');
+        const cInput = document.getElementById('c');
+        const updateBtn = document.getElementById('updateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const infoDiv = document.getElementById('parabolaInfo');
+        
+        // 📊 Գրաֆիկի կարգավորումներ
+        let layout = {
+            title: {
+                text: '✨ Պարաբոլայի Հրաշք ✨',
+                font: {size: 24, color: '#fff', family: 'Arial'},
+                x: 0.5
+            },
+            dragmode: 'pan',
+            xaxis: {
+                title: {text: 'X առանցք', font: {size: 16, color: '#c3cfe2'}},
+                range: [-20, 20],
+                zeroline: true,
+                zerolinecolor: 'rgba(255, 255, 255, 0.3)',
+                zerolinewidth: 2,
+                gridcolor: 'rgba(255, 255, 255, 0.1)',
+                showgrid: true,
+                color: '#c3cfe2'
+            },
+            yaxis: {
+                title: {text: 'Y առանցք', font: {size: 16, color: '#c3cfe2'}},
+                range: [-20, 20],
+                zeroline: true,
+                zerolinecolor: 'rgba(255, 255, 255, 0.3)',
+                zerolinewidth: 2,
+                gridcolor: 'rgba(255, 255, 255, 0.1)',
+                showgrid: true,
+                color: '#c3cfe2'
+            },
+            plot_bgcolor: 'rgba(255, 255, 255, 0.05)',
+            paper_bgcolor: 'transparent',
+            font: {color: '#fff'},
+            margin: {l: 80, r: 40, t: 80, b: 80},
+            showlegend: true,
+            legend: {
+                x: 0.02,
+                y: 0.98,
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                bordercolor: 'rgba(255, 255, 255, 0.2)',
+                borderwidth: 1
+            }
+        };
+        
+        let config = {
+            scrollZoom: true,
+            displaylogo: false,
+            displayModeBar: true,
+            modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+            responsive: true
+        };
+        
+        // 🎯 Սկզբնական գրաֆիկ
+        Plotly.newPlot(graphDiv, [], layout, config);
+        
+        // 🚀 Գրաֆիկ նկարելու ֆունկցիա
+        function draw(xmin = -50, xmax = 50) {
+            const a = parseFloat(aInput.value) || 0;
+            const b = parseFloat(bInput.value) || 0;
+            const c = parseFloat(cInput.value) || 0;
+            
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    a: a,
+                    b: b,
+                    c: c,
+                    xmin: xmin,
+                    xmax: xmax
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                // 📈 Պարաբոլայի գիծ
+                const trace = {
+                    x: data.x,
+                    y: data.y,
+                    mode: 'lines',
+                    line: {
+                        width: 4,
+                        color: a > 0 ? '#4ecdc4' : '#ff6b6b',
+                        shape: 'spline'
+                    },
+                    name: `y = ${a}x² ${b >= 0 ? '+' : ''}${b}x ${c >= 0 ? '+' : ''}${c}`,
+                    hovertemplate: 'x: %{x:.2f}<br>y: %{y:.2f}<extra></extra>'
+                };
+                
+                Plotly.react(graphDiv, [trace], layout, config);
+                
+                // 💫 Տեղեկատվություն թարմացնել
+                updateInfoPanel(data, a, b, c);
+            })
+            .catch(error => {
+                console.error('Սխալ:', error);
+            });
+        }
+        
+        // 📊 Տեղեկատվության վահանակ թարմացնել
+        function updateInfoPanel(data, a, b, c) {
+            const direction = a > 0 ? 'Վերև' : 'Ներքև';
+            const directionColor = a > 0 ? '#4ecdc4' : '#ff6b6b';
+            
+            infoDiv.innerHTML = `
+                <div class="stat-card">
+                    <h3>📐 Պարաբոլայի Հավասարում</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Հավասարում</span>
+                        <span class="stat-value">y = ${a}x² ${b >= 0 ? '+' : ''}${b}x ${c >= 0 ? '+' : ''}${c}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ճյուղերի ուղղություն</span>
+                        <span class="stat-value" style="color: ${directionColor}">${direction}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Y առանցքի կտրվածք</span>
+                        <span class="stat-value">(0, ${c})</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>📍 Կարևոր Կետեր</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Գագաթ</span>
+                        <span class="stat-value">(${data.vertex[0].toFixed(2)}, ${data.vertex[1].toFixed(2)})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ֆոկուս</span>
+                        <span class="stat-value">(${data.focus[0].toFixed(2)}, ${data.focus[1].toFixed(2)})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Ուղղաձիգ</span>
+                        <span class="stat-value">y = ${data.directrix.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 🔄 Zoom event → անվերջ վերագծում
+        graphDiv.on('plotly_relayout', e => {
+            if (e["xaxis.range[0]"] && e["xaxis.range[1]"]) {
+                const xmin = e["xaxis.range[0]"];
+                const xmax = e["xaxis.range[1]"];
+                draw(xmin, xmax);
+            }
+        });
+        
+        // ✨ Կոճակների իրադարձություններ
+        updateBtn.addEventListener('click', () => draw());
+        
+        resetBtn.addEventListener('click', () => {
+            aInput.value = 1;
+            bInput.value = 0;
+            cInput.value = 0;
+            draw();
+        });
+        
+        // 🚀 Սկզբնական գրաֆիկ
+        draw();
+        
+        // 🎇 Պարտիկների էֆեկտ
+        function createParticles() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animation = `floating ${3 + Math.random() * 4}s infinite ease-in-out`;
+                container.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+    </script>
+</body>
+</html>
